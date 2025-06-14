@@ -32,7 +32,7 @@ private final RestTemplate restTemplate = new RestTemplate();
     private String brapiBaseUrl = "https://brapi.dev/api";
 
 //    @Value("9cPmBnJyZmvKF6UNGqxYFp")
-    private String authorizationHeaderValue = "9cPmBnJyZmvKF6UNGqxYFp";
+    private String authorizationHeaderValue = "";
 
 //    public BrapClient(RestTemplate restTemplate, ObjectMapper objectMapper) {
 //        this.restTemplate = restTemplate;
