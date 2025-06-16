@@ -34,14 +34,27 @@ jobs:
               working-directory: ./RecommenderService
               run: mvn clean install
 
-            - name: Log in to Docker Hub
-              run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
-
+            # Configuração de Docker para build e push das imagens
             - name: Build and Push InvestmentDataService Production Image
               working-directory: ./InvestmentDataService
               run: |
-                  docker build -t cavasini/investmentdataservice .
-                  docker push cavasini/investmentdataservice
+                  docker build -t cavasini/investmentdata-service .
+                  docker push cavasini/investmentdata-service
+
+            - name: Build and Push ProfileAnalyzerService Production Image
+              working-directory: ./ProfileAnalyzerService
+              run: |
+                  docker build -t cavasini/profileanalyzer-service .
+                  docker push cavasini/profileanalyzer-service
+
+            - name: Build and Push RecommenderService Production Image
+              working-directory: ./RecommenderService
+              run: |
+                  docker build -t cavasini/recommender-service .
+                  docker push cavasini/recommender-service
+
+            - name: Log in to Docker Hub
+              run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
 
             # - name: Deploy to Production Environment
             #   run: |

@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+    investment:
+        container_name: investment-service
+        image: cavasini/investmentdataservice:latest
+        ports:
+            - "8082:8082"
+
+    profile:
+        container_name: profile-service
+        image: cavasini/profile-service:latest
+        ports:
+            - "8080:8080"
+        depends_on:
+            - investment
+
+    recommender:
+        container_name: recommender-service
+        image: cavasini/recommender-service:latest
+        ports:
+            - "8081:8081"
+        depends_on:
+            - investment
+            - profile
