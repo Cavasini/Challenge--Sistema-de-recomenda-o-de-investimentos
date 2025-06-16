@@ -26,34 +26,32 @@ jobs:
               working-directory: ./InvestmentDataService
               run: mvn clean install
 
+            - name: Build ProfileAnalyzerService JAR
+              working-directory: ./ProfileAnalyzerService
+              run: mvn clean install
+
+            - name: Build RecommenderService JAR
+              working-directory: ./RecommenderService
+              run: mvn clean install
+
             - name: Log in to Docker Hub
-              uses: docker/login-action@v3
-              with:
-                  username: ${{ secrets.DOCKER_USERNAME }}
-                  password: ${{ secrets.DOCKER_PASSWORD }} # Use uma credencial de produção!
+              run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
 
             - name: Build and Push InvestmentDataService Production Image
               working-directory: ./InvestmentDataService
               run: |
-                  # Use uma tag significativa, como o SHA do commit ou uma versão semântica
-                  IMAGE_TAG=${{ github.sha }} # ou ${{ github.event.release.tag_name }} se for trigger por release
-                  docker build -t your_docker_hub_username/investmentdataservice:${IMAGE_TAG} .
-                  docker push your_docker_hub_username/investmentdataservice:${IMAGE_TAG}
-                  docker tag your_docker_hub_username/investmentdataservice:${IMAGE_TAG} your_docker_hub_username/investmentdataservice:latest # Opcional: tag 'latest' para facilitar pull
-                  docker push your_docker_hub_username/investmentdataservice:latest
+                  docker build -t cavasini/investmentdataservice .
+                  docker push cavasini/investmentdataservice
 
-            # Repetir para ProfileAnalyzerService e RecommenderService com tags de produção
-            # ...
-
-            - name: Deploy to Production Environment
-              run: |
-                  # **Comandos de deploy para produção**
-                  # Isso pode envolver:
-                  # - Atualizar um Kubernetes deployment (kubectl apply -f your-deployment.yaml)
-                  # - Usar Terraform para provisionar/atualizar infra
-                  # - Executar um script de deploy via SSH para VMs
-                  # - Chamar uma API de deployment (e.g., AWS ECS, Azure App Service)
-                  echo "Deploying to production environment using image tag: ${{ github.sha }}"
-                  # Exemplo: kubectl set image deployment/investment-data-service investment-data-service=your_docker_hub_username/investmentdataservice:${{ github.sha }}
-              env:
-                  KUBECONFIG_BASE64: ${{ secrets.KUBECONFIG_PROD }} # Exemplo de segredo para credenciais de deploy
+            # - name: Deploy to Production Environment
+            #   run: |
+            #       # **Comandos de deploy para produção**
+            #       # Isso pode envolver:
+            #       # - Atualizar um Kubernetes deployment (kubectl apply -f your-deployment.yaml)
+            #       # - Usar Terraform para provisionar/atualizar infra
+            #       # - Executar um script de deploy via SSH para VMs
+            #       # - Chamar uma API de deployment (e.g., AWS ECS, Azure App Service)
+            #       echo "Deploying to production environment using image tag: ${{ github.sha }}"
+            #       # Exemplo: kubectl set image deployment/investment-data-service investment-data-service=your_docker_hub_username/investmentdataservice:${{ github.sha }}
+            #   env:
+            #       KUBECONFIG_BASE64: ${{ secrets.KUBECONFIG_PROD }} # Exemplo de segredo para credenciais de deploy
