@@ -14,11 +14,47 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
 
-            - name: Build InvestmentDataService
-              run: docker build ./InvestmentDataService
+            # --- InvestmentDataService ---
+            - name: Setup Java for InvestmentDataService
+              uses: actions/setup-java@v3
+              with:
+                  java-version: "21" # ou a versão do Java que você usa (e.g., '17')
+                  distribution: "temurin"
 
-            - name: Build ProfileAnalyzerService
-              run: docker build ./ProfileAnalyzerService
+            - name: Build InvestmentDataService JAR
+              working-directory: ./InvestmentDataService # Garante que o comando seja executado no diretório do serviço
+              run: mvn clean install -DskipTests # Compila o projeto e gera o JAR. -DskipTests para pular testes e ser mais rápido
 
-            - name: Build RecommenderService
-              run: docker build ./RecommenderService
+            - name: Build InvestmentDataService Docker Image
+              working-directory: ./InvestmentDataService
+              run: docker build -t investmentdataservice:latest .
+
+            # --- ProfileAnalyzerService ---
+            - name: Setup Java for ProfileAnalyzerService
+              uses: actions/setup-java@v3
+              with:
+                  java-version: "21" # ou a versão do Java que você usa
+                  distribution: "temurin"
+
+            - name: Build ProfileAnalyzerService JAR
+              working-directory: ./ProfileAnalyzerService
+              run: mvn clean install -DskipTests
+
+            - name: Build ProfileAnalyzerService Docker Image
+              working-directory: ./ProfileAnalyzerService
+              run: docker build -t profileanalyzerservice:latest .
+
+            # --- RecommenderService ---
+            - name: Setup Java for RecommenderService
+              uses: actions/setup-java@v3
+              with:
+                  java-version: "21" # ou a versão do Java que você usa
+                  distribution: "temurin"
+
+            - name: Build RecommenderService JAR
+              working-directory: ./RecommenderService
+              run: mvn clean install -DskipTests
+
+            - name: Build RecommenderService Docker Image
+              working-directory: ./RecommenderService
+              run: docker build -t recommender-service:latest .
