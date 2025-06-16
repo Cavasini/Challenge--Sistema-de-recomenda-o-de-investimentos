@@ -8,14 +8,12 @@ on:
     #   branches: ["main"] # Normalmente PRs para main são do tipo 'squash and merge' de develop ou feature branches
 
 jobs:
-    build_and_deploy:
+    build_jars:
         runs-on: ubuntu-latest
-        environment: production # Opcional: Define um ambiente no GitHub para gerenciar segredos e revisores
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
 
-            # Configuração de Java, Maven e Docker build
             - name: Setup Java
               uses: actions/setup-java@v3
               with:
@@ -34,7 +32,15 @@ jobs:
               working-directory: ./RecommenderService
               run: mvn clean install
 
-              #Logar no Docker Hub antes de construir e enviar as imagens**
+    build_and_push_docker_images:
+        runs-on: ubuntu-latest
+        needs: build_jars # Este job só será executado após 'build_jars' ser concluído com sucesso
+        environment: production # Opcional: Define um ambiente no GitHub para gerenciar segredos e revisores
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            # Logar no Docker Hub antes de construir e enviar as imagens
             - name: Log in to Docker Hub
               uses: docker/login-action@v2 # Usar uma action dedicada para login é uma boa prática
               with:
@@ -60,15 +66,20 @@ jobs:
                   docker build -t cavasini/recommender-service .
                   docker push cavasini/recommender-service
 
-            # - name: Deploy to Production Environment
-            #   run: |
-            #       # **Comandos de deploy para produção**
-            #       # Isso pode envolver:
-            #       # - Atualizar um Kubernetes deployment (kubectl apply -f your-deployment.yaml)
-            #       # - Usar Terraform para provisionar/atualizar infra
-            #       # - Executar um script de deploy via SSH para VMs
-            #       # - Chamar uma API de deployment (e.g., AWS ECS, Azure App Service)
-            #       echo "Deploying to production environment using image tag: ${{ github.sha }}"
-            #       # Exemplo: kubectl set image deployment/investment-data-service investment-data-service=your_docker_hub_username/investmentdataservice:${{ github.sha }}
-            #   env:
-            #       KUBECONFIG_BASE64: ${{ secrets.KUBECONFIG_PROD }} # Exemplo de segredo para credenciais de deploy
+    # deploy:
+    #   runs-on: ubuntu-latest
+    #   needs: build_and_push_docker_images # Este job só será executado após 'build_and_push_docker_images' ser concluído com sucesso
+    #   environment: production # Opcional: Define um ambiente no GitHub para gerenciar segredos e revisores
+    #   steps:
+    #     - name: Deploy to Production Environment
+    #       run: |
+    #         # **Comandos de deploy para produção**
+    #         # Isso pode envolver:
+    #         # - Atualizar um Kubernetes deployment (kubectl apply -f your-deployment.yaml)
+    #         # - Usar Terraform para provisionar/atualizar infra
+    #         # - Executar um script de deploy via SSH para VMs
+    #         # - Chamar uma API de deployment (e.g., AWS ECS, Azure App Service)
+    #         echo "Deploying to production environment using image tag: ${{ github.sha }}"
+    #         # Exemplo: kubectl set image deployment/investment-data-service investment-data-service=your_docker_hub_username/investmentdataservice:${{ github.sha }}
+    #       env:
+    #         KUBECONFIG_BASE64: ${{ secrets.KUBECONFIG_PROD }} # Exemplo de segredo para credenciais de deploy
