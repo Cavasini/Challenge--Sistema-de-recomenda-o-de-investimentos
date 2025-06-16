@@ -36,7 +36,7 @@ public class BrapApiClient {
    @Value("${brapi.api.base-url:https://brapi.dev/api}")
     private String brapiBaseUrl;
 
-   @Value("${brapi.api.auth-token}")
+   @Value("${brapi.api.auth.token}")
     private String authorizationHeaderValue;
 
     public BrapApiClient(RestTemplate restTemplate, ObjectMapper objectMapper) {
