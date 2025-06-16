@@ -1,0 +1,59 @@
+# .github/workflows/ci-cd-main.yml
+name: CI/CD - Main Branch (Production)
+
+on:
+    push:
+        branches: ["main"] # Aciona apenas quando houver push para a main
+    # pull_request:
+    #   branches: ["main"] # Normalmente PRs para main são do tipo 'squash and merge' de develop ou feature branches
+
+jobs:
+    build_and_deploy:
+        runs-on: ubuntu-latest
+        environment: production # Opcional: Define um ambiente no GitHub para gerenciar segredos e revisores
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            # Configuração de Java, Maven e Docker build (similar ao develop)
+            - name: Setup Java
+              uses: actions/setup-java@v3
+              with:
+                  java-version: "21"
+                  distribution: "temurin"
+
+            - name: Build InvestmentDataService JAR
+              working-directory: ./InvestmentDataService
+              run: mvn clean install
+
+            - name: Log in to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ secrets.DOCKER_USERNAME }}
+                  password: ${{ secrets.DOCKER_PASSWORD_PROD }} # Use uma credencial de produção!
+
+            - name: Build and Push InvestmentDataService Production Image
+              working-directory: ./InvestmentDataService
+              run: |
+                  # Use uma tag significativa, como o SHA do commit ou uma versão semântica
+                  IMAGE_TAG=${{ github.sha }} # ou ${{ github.event.release.tag_name }} se for trigger por release
+                  docker build -t your_docker_hub_username/investmentdataservice:${IMAGE_TAG} .
+                  docker push your_docker_hub_username/investmentdataservice:${IMAGE_TAG}
+                  docker tag your_docker_hub_username/investmentdataservice:${IMAGE_TAG} your_docker_hub_username/investmentdataservice:latest # Opcional: tag 'latest' para facilitar pull
+                  docker push your_docker_hub_username/investmentdataservice:latest
+
+            # Repetir para ProfileAnalyzerService e RecommenderService com tags de produção
+            # ...
+
+            - name: Deploy to Production Environment
+              run: |
+                  # **Comandos de deploy para produção**
+                  # Isso pode envolver:
+                  # - Atualizar um Kubernetes deployment (kubectl apply -f your-deployment.yaml)
+                  # - Usar Terraform para provisionar/atualizar infra
+                  # - Executar um script de deploy via SSH para VMs
+                  # - Chamar uma API de deployment (e.g., AWS ECS, Azure App Service)
+                  echo "Deploying to production environment using image tag: ${{ github.sha }}"
+                  # Exemplo: kubectl set image deployment/investment-data-service investment-data-service=your_docker_hub_username/investmentdataservice:${{ github.sha }}
+              env:
+                  KUBECONFIG_BASE64: ${{ secrets.KUBECONFIG_PROD }} # Exemplo de segredo para credenciais de deploy
