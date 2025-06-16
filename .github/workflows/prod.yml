@@ -1,85 +1,179 @@
 # .github/workflows/ci-cd-main.yml
-name: CI/CD - Main Branch (Production)
+name: CI/CD - Monorepo (Production)
 
 on:
     push:
-        branches: ["main"] # Aciona apenas quando houver push para a main
+        branches: ["main"]
     # pull_request:
-    #   branches: ["main"] # Normalmente PRs para main são do tipo 'squash and merge' de develop ou feature branches
+    #   branches: ["main"]
 
 jobs:
-    build_jars:
+    # Job para detectar quais serviços foram alterados
+    detect_changes:
         runs-on: ubuntu-latest
+        outputs:
+            investmentdataservice_changed: ${{ steps.filter.outputs.investmentdataservice }}
+            profileanalyzerservice_changed: ${{ steps.filter.outputs.profileanalyzerservice }}
+            recommenderservice_changed: ${{ steps.filter.outputs.recommenderservice }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
+              with:
+                  fetch-depth: 2
+            - name: Check for changes in service folders
+              id: filter
+              uses: dorny/paths-filter@v3
+              with:
+                  filters: |
+                      investmentdataservice:
+                        - 'InvestmentDataService/**'
+                        - '.github/workflows/ci-cd-main.yml' # Roda se o próprio workflow for alterado
+                      profileanalyzerservice:
+                        - 'ProfileAnalyzerService/**'
+                        - '.github/workflows/ci-cd-main.yml'
+                      recommenderservice:
+                        - 'RecommenderService/**'
+                        - '.github/workflows/ci-cd-main.yml'
 
+    # Job para construir os JARs
+    # Este job pode ser configurado para:
+    # 1. Rodar SOMENTE se algum serviço mudou (como está agora)
+    # 2. Rodar e buildar SOMENTE os JARs que mudaram (adicionando 'if' em cada mvn clean install)
+    # A opção 1 é um bom ponto de partida, a 2 é para otimização máxima em tempo de build de JARs.
+    build_jars:
+        runs-on: ubuntu-latest
+        needs: detect_changes # Depende do job de detecção de mudanças
+        # Este job só roda se QUALQUER um dos serviços tiver mudanças
+        if: needs.detect_changes.outputs.investmentdataservice_changed == 'true' || needs.detect_changes.outputs.profileanalyzerservice_changed == 'true' || needs.detect_changes.outputs.recommenderservice_changed == 'true'
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
             - name: Setup Java
               uses: actions/setup-java@v3
               with:
                   java-version: "21"
                   distribution: "temurin"
 
+            # Os passos de build do JAR também podem ter 'if' individual se quiser
+            # granularidade ainda maior e economizar tempo de compilação quando um único JAR muda.
+            # No entanto, se o build de todos os JARs for rápido, pode ser mais simples
+            # buildar todos aqui e apenas os jobs de Docker/Deploy reagirem às mudanças.
             - name: Build InvestmentDataService JAR
+              # if: needs.detect_changes.outputs.investmentdataservice_changed == 'true' # Opcional: Adicionar para build de JAR condicional
               working-directory: ./InvestmentDataService
               run: mvn clean install
+            - name: Upload InvestmentDataService JAR
+              if: needs.detect_changes.outputs.investmentdataservice_changed == 'true' # O upload deve ser condicional se o build também for
+              uses: actions/upload-artifact@v3
+              with:
+                  name: investmentdataservice-jar
+                  path: ./InvestmentDataService/target/InvestmentDataService-0.0.1.jar
 
             - name: Build ProfileAnalyzerService JAR
+              # if: needs.detect_changes.outputs.profileanalyzerservice_changed == 'true' # Opcional
               working-directory: ./ProfileAnalyzerService
               run: mvn clean install
+            - name: Upload ProfileAnalyzerService JAR
+              if: needs.detect_changes.outputs.profileanalyzerservice_changed == 'true'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: profileanalyzerservice-jar
+                  path: ./ProfileAnalyzerService/target/ProfileAnalyzerService-0.0.1.jar
 
             - name: Build RecommenderService JAR
+              # if: needs.detect_changes.outputs.recommenderservice_changed == 'true' # Opcional
               working-directory: ./RecommenderService
               run: mvn clean install
-
-    build_and_push_docker_images:
-        runs-on: ubuntu-latest
-        needs: build_jars # Este job só será executado após 'build_jars' ser concluído com sucesso
-        environment: production # Opcional: Define um ambiente no GitHub para gerenciar segredos e revisores
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v3
-
-            # Logar no Docker Hub antes de construir e enviar as imagens
-            - name: Log in to Docker Hub
-              uses: docker/login-action@v2 # Usar uma action dedicada para login é uma boa prática
+            - name: Upload RecommenderService JAR
+              if: needs.detect_changes.outputs.recommenderservice_changed == 'true'
+              uses: actions/upload-artifact@v3
               with:
-                  username: ${{ secrets.DOCKER_USERNAME }}
-                  password: ${{ secrets.DOCKER_PASSWORD }}
+                  name: recommender-service-jar
+                  path: ./RecommenderService/target/RecommenderService-0.0.1.jar
 
-            # Configuração de Docker para build e push das imagens
-            - name: Build and Push InvestmentDataService Production Image
-              working-directory: ./InvestmentDataService
-              run: |
-                  docker build -t cavasini/investmentdata-service .
-                  docker push cavasini/investmentdata-service
+    # Jobs de Build e Push de Imagens Docker (AGORA SIM, CADA UM COM SEU PRÓPRIO IF)
+    # --------------------------------------------------------------------------------
 
-            - name: Build and Push ProfileAnalyzerService Production Image
-              working-directory: ./ProfileAnalyzerService
-              run: |
-                  docker build -t cavasini/profileanalyzer-service .
-                  docker push cavasini/profileanalyzer-service
-
-            - name: Build and Push RecommenderService Production Image
-              working-directory: ./RecommenderService
-              run: |
-                  docker build -t cavasini/recommender-service .
-                  docker push cavasini/recommender-service
-
-    # deploy:
+    # build_and_push_investmentdataservice:
     #   runs-on: ubuntu-latest
-    #   needs: build_and_push_docker_images # Este job só será executado após 'build_and_push_docker_images' ser concluído com sucesso
-    #   environment: production # Opcional: Define um ambiente no GitHub para gerenciar segredos e revisores
+    #   needs: [detect_changes, build_jars] # Depende da detecção de mudanças e do build dos JARs
+    #   environment: production
+    #   # ---> ESTE É O 'IF' QUE GARANTE QUE SÓ RODE SE O SERVIÇO MUDOU <---
+    #   if: needs.detect_changes.outputs.investmentdataservice_changed == 'true'
     #   steps:
-    #     - name: Deploy to Production Environment
+    #     - name: Checkout code
+    #       uses: actions/checkout@v3
+    #     - name: Download InvestmentDataService JAR
+    #       uses: actions/download-artifact@v3
+    #       with:
+    #         name: investmentdataservice-jar
+    #         path: ./InvestmentDataService/target/
+    #     - name: Log in to Docker Hub
+    #       uses: docker/login-action@v2
+    #       with:
+    #         username: ${{ secrets.DOCKER_USERNAME }}
+    #         password: ${{ secrets.DOCKER_PASSWORD }}
+    #     - name: Build and Push InvestmentDataService Production Image
+    #       working-directory: ./InvestmentDataService
     #       run: |
-    #         # **Comandos de deploy para produção**
-    #         # Isso pode envolver:
-    #         # - Atualizar um Kubernetes deployment (kubectl apply -f your-deployment.yaml)
-    #         # - Usar Terraform para provisionar/atualizar infra
-    #         # - Executar um script de deploy via SSH para VMs
-    #         # - Chamar uma API de deployment (e.g., AWS ECS, Azure App Service)
-    #         echo "Deploying to production environment using image tag: ${{ github.sha }}"
-    #         # Exemplo: kubectl set image deployment/investment-data-service investment-data-service=your_docker_hub_username/investmentdataservice:${{ github.sha }}
-    #       env:
-    #         KUBECONFIG_BASE64: ${{ secrets.KUBECONFIG_PROD }} # Exemplo de segredo para credenciais de deploy
+    #         docker build -t cavasini/investmentdata-service .
+    #         docker push cavasini/investmentdata-service
+
+    # build_and_push_profileanalyzerservice:
+    #   runs-on: ubuntu-latest
+    #   needs: [detect_changes, build_jars]
+    #   environment: production
+    #   # ---> ESTE É O 'IF' QUE GARANTE QUE SÓ RODE SE O SERVIÇO MUDOU <---
+    #   if: needs.detect_changes.outputs.profileanalyzerservice_changed == 'true'
+    #   steps:
+    #     - name: Checkout code
+    #       uses: actions/checkout@v3
+    #     - name: Download ProfileAnalyzerService JAR
+    #       uses: actions/download-artifact@v3
+    #       with:
+    #         name: profileanalyzerservice-jar
+    #         path: ./ProfileAnalyzerService/target/
+    #     - name: Log in to Docker Hub
+    #       uses: docker/login-action@v2
+    #       with:
+    #         username: ${{ secrets.DOCKER_USERNAME }}
+    #         password: ${{ secrets.DOCKER_PASSWORD }}
+    #     - name: Build and Push ProfileAnalyzerService Production Image
+    #       working-directory: ./ProfileAnalyzerService
+    #       run: |
+    #         docker build -t cavasini/profileanalyzer-service .
+    #         docker push cavasini/profileanalyzer-service
+
+    # build_and_push_recommenderservice:
+    #   runs-on: ubuntu-latest
+    #   needs: [detect_changes, build_jars]
+    #   environment: production
+    #   if: needs.detect_changes.outputs.recommenderservice_changed == 'true'
+    #   steps:
+    #     - name: Checkout code
+    #       uses: actions/checkout@v3
+    #     - name: Download RecommenderService JAR
+    #       uses: actions/download-artifact@v3
+    #       with:
+    #         name: recommender-service-jar
+    #         path: ./RecommenderService/target/
+    #     - name: Log in to Docker Hub
+    #       uses: docker/login-action@v2
+    #       with:
+    #         username: ${{ secrets.DOCKER_USERNAME }}
+    #         password: ${{ secrets.DOCKER_PASSWORD }}
+    #     - name: Build and Push RecommenderService Production Image
+    #       working-directory: ./RecommenderService
+    #       run: |
+    #         docker build -t cavasini/recommender-service .
+    #         docker push cavasini/recommender-service
+
+    # E você faria o mesmo para os jobs de deploy, se forem separados por serviço:
+    # deploy_investmentdataservice:
+    #   runs-on: ubuntu-latest
+    #   needs: [detect_changes, build_and_push_investmentdataservice]
+    #   environment: production
+    #   if: needs.detect_changes.outputs.investmentdataservice_changed == 'true'
+    #   steps:
+    #     - name: Deploy InvestmentDataService to Production
+    #       run: echo "Deploying InvestmentDataService..."
