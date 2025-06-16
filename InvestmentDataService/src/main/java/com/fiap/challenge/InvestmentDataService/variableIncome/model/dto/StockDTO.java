@@ -1,4 +1,4 @@
-package com.fiap.challenge.InvestmentDataService.model.dto;
+package com.fiap.challenge.InvestmentDataService.variableIncome.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Objects; // Importe esta classe
@@ -53,8 +53,6 @@ public class StockDTO {
     public String getType() {
         return type;
     }
-
-    // --- Métodos equals() e hashCode() para garantir unicidade no Set ---
 
     @Override
     public boolean equals(Object o) {
