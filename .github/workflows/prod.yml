@@ -153,7 +153,7 @@ jobs:
 
                       # Rodar o novo container (ajuste as portas e volumes conforme sua necessidade)
                       # Exemplo: mapeando porta 8080 do container para 80 do host
-                      docker run -d --name investmentdata-service-container -p 80:8080 cavasini/investmentdata-service
+                      docker run -d --name investmentdata-service-container -p 8082:8082 cavasini/investmentdata-service
 
                       echo "--- Deployment of InvestmentDataService complete ---"
 
@@ -179,7 +179,7 @@ jobs:
 
                       docker pull cavasini/profileanalyzer-service
 
-                      docker run -d --name profileanalyzer-service-container -p 8081:8080 cavasini/profileanalyzer-service # Exemplo de porta diferente
+                      docker run -d --name profileanalyzer-service-container -p 8080:8080 cavasini/profileanalyzer-service # Exemplo de porta diferente
                       echo "--- Deployment of ProfileAnalyzerService complete ---"
 
     deploy_recommenderservice:
@@ -204,5 +204,5 @@ jobs:
 
                       docker pull cavasini/recommender-service
 
-                      docker run -d --name recommender-service-container -p 8082:8080 cavasini/recommender-service # Exemplo de porta diferente
+                      docker run -d --name recommender-service-container -p 8081:8081 cavasini/recommender-service # Exemplo de porta diferente
                       echo "--- Deployment of RecommenderService complete ---"
