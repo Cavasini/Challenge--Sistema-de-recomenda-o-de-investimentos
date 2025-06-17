@@ -168,7 +168,7 @@ jobs:
                       docker rm investmentdata-service-container || true
                       docker rmi cavasini/investmentdata-service || true
                       docker pull cavasini/investmentdata-service
-                      docker run -d --name investmentdata-service-container -p 80:8080 cavasini/investmentdata-service
+                      docker run -d --name investmentdata-service-container -p 8082:8082 -e BRAP_API_AUTH_TOKEN=${{ secrets.BRAP_API_AUTH_TOKEN }}  cavasini/investmentdata-service
                       echo "--- Deployment of InvestmentDataService complete ---"
 
     deploy_profileanalyzerservice:
@@ -190,7 +190,7 @@ jobs:
                       docker rm profileanalyzer-service-container || true
                       docker rmi cavasini/profileanalyzer-service || true
                       docker pull cavasini/profileanalyzer-service
-                      docker run -d --name profileanalyzer-service-container -p 8081:8080 cavasini/profileanalyzer-service
+                      docker run -d --name profileanalyzer-service-container -p 8080:8080 cavasini/profileanalyzer-service # Exemplo de porta diferente
                       echo "--- Deployment of ProfileAnalyzerService complete ---"
 
     deploy_recommenderservice:
@@ -212,7 +212,7 @@ jobs:
                       docker rm recommender-service-container || true
                       docker rmi cavasini/recommender-service || true
                       docker pull cavasini/recommender-service
-                      docker run -d --name recommender-service-container -p 8082:8080 cavasini/recommender-service
+                      docker run -d --name recommender-service-container -p 8081:8081 cavasini/recommender-service # Exemplo de porta diferente
                       echo "--- Deployment of RecommenderService complete ---"
 
     deploy_authservice: # Adicionado
