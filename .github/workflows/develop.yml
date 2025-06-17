@@ -58,3 +58,18 @@ jobs:
             - name: Build RecommenderService Docker Image
               working-directory: ./RecommenderService
               run: docker build -t recommender-service:latest .
+
+            # --- AuthService ---
+            - name: Setup Java for RecommenderService
+              uses: actions/setup-java@v3
+              with:
+                  java-version: "21" # ou a versão do Java que você usa
+                  distribution: "temurin"
+
+            - name: Build AuthService JAR
+              working-directory: ./AuthService
+              run: mvn clean install -DskipTests
+
+            - name: Build AuthService Docker Image
+              working-directory: ./AuthService
+              run: docker build -t auth-service:latest .
