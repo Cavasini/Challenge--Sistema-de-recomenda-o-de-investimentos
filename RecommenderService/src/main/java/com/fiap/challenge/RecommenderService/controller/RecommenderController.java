@@ -35,18 +35,21 @@ public class RecommenderController {
                     fixedIncomeAnalyzer.getFixedIncomesBasedOnProfile(InvestmentProfile.CONSERVATIVE),
                     variableIncomeAnalyzer.getAndProcessGroupedVariableIncomes(InvestmentProfile.CONSERVATIVE)
             );
+
             return ResponseEntity.ok(response);
         } else if (profileData.getProfileClassification().equals("Moderado")) {
             ResponseDTO response = new ResponseDTO(
                     fixedIncomeAnalyzer.getFixedIncomesBasedOnProfile(InvestmentProfile.MODERATE),
                     variableIncomeAnalyzer.getAndProcessGroupedVariableIncomes(InvestmentProfile.MODERATE)
             );
+
             return ResponseEntity.ok(response);
         } else if (profileData.getProfileClassification().equals("Sofisticado")) {
             ResponseDTO response = new ResponseDTO(
                     fixedIncomeAnalyzer.getFixedIncomesBasedOnProfile(InvestmentProfile.AGGRESSIVE),
                     variableIncomeAnalyzer.getAndProcessGroupedVariableIncomes(InvestmentProfile.AGGRESSIVE)
             );
+            
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

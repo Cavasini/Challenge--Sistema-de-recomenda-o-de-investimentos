@@ -16,6 +16,7 @@ jobs:
             profileanalyzerservice_changed: ${{ steps.filter.outputs.profileanalyzerservice }}
             recommenderservice_changed: ${{ steps.filter.outputs.recommenderservice }}
             authservice: ${{ steps.filter.outputs.authservice }}
+            authservice_changed: ${{ steps.filter.outputs.authservice }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -33,8 +34,8 @@ jobs:
                       profileanalyzerservice:
                         - 'ProfileAnalyzerService/**'
                         - '.github/workflows/ci-cd-main.yml'
-                      authservice:
-                        - 'AuthService/**'
+                      recommenderservice:
+                        - 'RecommenderService/**'
                         - '.github/workflows/ci-cd-main.yml'
     # ... (os jobs 'build_docker_<servico>' permanecem os mesmos) ...
     build_docker_investmentdataservice:
