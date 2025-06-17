@@ -8,13 +8,15 @@ on:
     #   branches: ["main"]
 
 jobs:
+    # ... (o job 'detect_changes' permanece o mesmo) ...
     detect_changes:
         runs-on: ubuntu-latest
         outputs:
             investmentdataservice_changed: ${{ steps.filter.outputs.investmentdataservice }}
             profileanalyzerservice_changed: ${{ steps.filter.outputs.profileanalyzerservice }}
             recommenderservice_changed: ${{ steps.filter.outputs.recommenderservice }}
-            authservice_changed: ${{ steps.filter.outputs.authservice }} # Adicionado
+            authservice: ${{ steps.filter.outputs.authservice }}
+            userservice_changed: ${{ steps.filter.outputs.userservice }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -27,18 +29,18 @@ jobs:
               with:
                   filters: |
                       investmentdataservice:
-                          - 'InvestmentDataService/**'
-                          - '.github/workflows/ci-cd-main.yml'
+                        - 'InvestmentDataService/**'
+                        - '.github/workflows/ci-cd-main.yml'
                       profileanalyzerservice:
-                          - 'ProfileAnalyzerService/**'
-                          - '.github/workflows/ci-cd-main.yml'
-                      recommenderservice:
-                          - 'RecommenderService/**'
-                          - '.github/workflows/ci-cd-main.yml'
-                      authservice: # Adicionado
-                          - 'AuthService/**' # CORRIGIDO AQUI!
-                          - '.github/workflows/ci-cd-main.yml'
-
+                        - 'ProfileAnalyzerService/**'
+                        - '.github/workflows/ci-cd-main.yml'
+                      authservice:
+                        - 'AuthService/**'
+                        - '.github/workflows/ci-cd-main.yml'
+                      userservice:
+                        - 'UserService/**'
+                        - '.github/workflows/ci-cd-main.yml'
+    # ... (os jobs 'build_docker_<servico>' permanecem os mesmos) ...
     build_docker_investmentdataservice:
         runs-on: ubuntu-latest
         needs: detect_changes
@@ -65,7 +67,6 @@ jobs:
               run: |
                   docker build -t cavasini/investmentdata-service .
                   docker push cavasini/investmentdata-service
-
     build_docker_profileanalyzerservice:
         runs-on: ubuntu-latest
         needs: detect_changes
@@ -92,7 +93,6 @@ jobs:
               run: |
                   docker build -t cavasini/profileanalyzer-service .
                   docker push cavasini/profileanalyzer-service
-
     build_docker_recommenderservice:
         runs-on: ubuntu-latest
         needs: detect_changes
@@ -120,11 +120,11 @@ jobs:
                   docker build -t cavasini/recommender-service .
                   docker push cavasini/recommender-service
 
-    build_docker_authservice: # Adicionado
+    build_docker_userservice:
         runs-on: ubuntu-latest
         needs: detect_changes
         environment: production
-        if: needs.detect_changes.outputs.authservice_changed == 'true'
+        if: needs.detect_changes.outputs.userservice_changed == 'true'
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -133,44 +133,52 @@ jobs:
               with:
                   java-version: "21"
                   distribution: "temurin"
-            - name: Build AuthService JAR
-              working-directory: ./AuthService
+            - name: Build UserService JAR
+              working-directory: ./UserService
               run: mvn clean install
             - name: Log in to Docker Hub
               uses: docker/login-action@v3
               with:
                   username: ${{ secrets.DOCKER_USERNAME }}
                   password: ${{ secrets.DOCKER_PASSWORD }}
-            - name: Build and Push AuthService Production Image
-              working-directory: ./AuthService
+            - name: Build and Push UserService Production Image
+              working-directory: ./UserService
               run: |
-                  docker build -t cavasini/auth-service .
-                  docker push cavasini/auth-service
+                  docker build -t cavasini/user-service .
+                  docker push cavasini/user-service
 
     # --- Jobs de Deploy para EC2 (Atualizados) ---
 
     deploy_investmentdataservice:
         runs-on: ubuntu-latest
-        needs: [detect_changes, build_docker_investmentdataservice]
+        needs: [detect_changes, build_docker_investmentdataservice] # Depende da detecção e do build/push do InvestmentDataService
         environment: production
-        if: needs.detect_changes.outputs.investmentdataservice_changed == 'true' && always()
+        if: needs.detect_changes.outputs.investmentdataservice_changed == 'true' && always() # `always()` para rodar mesmo se build_docker_investmentdataservice falhar (opcional)
         steps:
             - name: Deploy InvestmentDataService to EC2
-              uses: appleboy/ssh-action@v1.0.0
+              uses: appleboy/ssh-action@v1.0.0 # Usaremos esta action para SSH
               with:
                   host: ${{ secrets.EC2_HOST }}
                   username: ${{ secrets.EC2_USERNAME }}
                   key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
                   script: |
                       echo "--- Deploying InvestmentDataService ---"
+                      # Navegar para o diretório do projeto ou onde você gerencia seus containers
+                      # cd /home/${{ secrets.EC2_USERNAME }}/my-app/investmentdataservice
+                      # Fazer login no Docker Hub na EC2 (se ainda não estiver logado ou token expirar)
+                      # Use as mesmas credenciais do Docker Hub
                       echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-                      docker stop investmentdata-service-container || true
+                      # Parar e remover o container existente (se houver)
+                      docker stop investmentdata-service-container || true # '|| true' evita que o workflow falhe se o container não existir
                       docker rm investmentdata-service-container || true
+                      # Remover a imagem antiga para garantir que a nova seja puxada
                       docker rmi cavasini/investmentdata-service || true
+                      # Puxar a nova imagem
                       docker pull cavasini/investmentdata-service
+                      # Rodar o novo container (ajuste as portas e volumes conforme sua necessidade)
+                      # Exemplo: mapeando porta 8080 do container para 80 do host
                       docker run -d --name investmentdata-service-container -p 8082:8082 -e BRAP_API_AUTH_TOKEN=${{ secrets.BRAP_API_AUTH_TOKEN }}  cavasini/investmentdata-service
                       echo "--- Deployment of InvestmentDataService complete ---"
-
     deploy_profileanalyzerservice:
         runs-on: ubuntu-latest
         needs: [detect_changes, build_docker_profileanalyzerservice]
@@ -192,7 +200,6 @@ jobs:
                       docker pull cavasini/profileanalyzer-service
                       docker run -d --name profileanalyzer-service-container -p 8080:8080 cavasini/profileanalyzer-service # Exemplo de porta diferente
                       echo "--- Deployment of ProfileAnalyzerService complete ---"
-
     deploy_recommenderservice:
         runs-on: ubuntu-latest
         needs: [detect_changes, build_docker_recommenderservice]
@@ -215,24 +222,24 @@ jobs:
                       docker run -d --name recommender-service-container -p 8081:8081 cavasini/recommender-service # Exemplo de porta diferente
                       echo "--- Deployment of RecommenderService complete ---"
 
-    deploy_authservice: # Adicionado
+    deploy_userservice:
         runs-on: ubuntu-latest
-        needs: [detect_changes, build_docker_authservice]
+        needs: [detect_changes, build_docker_userservice]
         environment: production
-        if: needs.detect_changes.outputs.authservice_changed == 'true' && always()
+        if: needs.detect_changes.outputs.userservice_changed == 'true' && always()
         steps:
-            - name: Deploy AuthService to EC2
+            - name: Deploy UserService to EC2
               uses: appleboy/ssh-action@v1.0.0
               with:
                   host: ${{ secrets.EC2_HOST }}
                   username: ${{ secrets.EC2_USERNAME }}
                   key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
                   script: |
-                      echo "--- Deploying AuthService ---"
+                      echo "--- Deploying UserService ---"
                       echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-                      docker stop auth-service-container || true
-                      docker rm auth-service-container || true
-                      docker rmi cavasini/auth-service || true
-                      docker pull cavasini/auth-service
-                      docker run -d --name auth-service-container -p 8083:8080 cavasini/auth-service # Exemplo de porta diferente
-                      echo "--- Deployment of AuthService complete ---"
+                      docker stop user-service-container || true
+                      docker rm user-service-container || true
+                      docker rmi cavasini/user-service || true
+                      docker pull cavasini/user-service
+                      docker run -d --name user-service-container -p 8083:8083 cavasini/user-service # Exemplo de porta diferente
+                      echo "--- Deployment of UserService complete ---"

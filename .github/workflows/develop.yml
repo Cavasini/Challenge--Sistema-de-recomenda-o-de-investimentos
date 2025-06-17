@@ -60,7 +60,7 @@ jobs:
               run: docker build -t recommender-service:latest .
 
             # --- AuthService ---
-            - name: Setup Java for RecommenderService
+            - name: Setup Java for AuthService
               uses: actions/setup-java@v3
               with:
                   java-version: "21" # ou a versão do Java que você usa
