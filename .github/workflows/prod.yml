@@ -16,7 +16,7 @@ jobs:
             profileanalyzerservice_changed: ${{ steps.filter.outputs.profileanalyzerservice }}
             recommenderservice_changed: ${{ steps.filter.outputs.recommenderservice }}
             authservice: ${{ steps.filter.outputs.authservice }}
-            userservice_changed: ${{ steps.filter.outputs.userservice }}
+            authservice_changed: ${{ steps.filter.outputs.authservice }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -120,11 +120,11 @@ jobs:
                   docker build -t cavasini/recommender-service .
                   docker push cavasini/recommender-service
 
-    build_docker_userservice:
+    build_docker_authservice:
         runs-on: ubuntu-latest
         needs: detect_changes
         environment: production
-        if: needs.detect_changes.outputs.userservice_changed == 'true'
+        if: needs.detect_changes.outputs.authservice_changed == 'true'
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -133,19 +133,19 @@ jobs:
               with:
                   java-version: "21"
                   distribution: "temurin"
-            - name: Build UserService JAR
-              working-directory: ./UserService
+            - name: Build AuthService JAR
+              working-directory: ./AuthService
               run: mvn clean install
             - name: Log in to Docker Hub
               uses: docker/login-action@v3
               with:
                   username: ${{ secrets.DOCKER_USERNAME }}
                   password: ${{ secrets.DOCKER_PASSWORD }}
-            - name: Build and Push UserService Production Image
-              working-directory: ./UserService
+            - name: Build and Push AuthService Production Image
+              working-directory: ./AuthService
               run: |
-                  docker build -t cavasini/user-service .
-                  docker push cavasini/user-service
+                  docker build -t cavasini/auth-service .
+                  docker push cavasini/authr-service
 
     # --- Jobs de Deploy para EC2 (Atualizados) ---
 
@@ -222,24 +222,24 @@ jobs:
                       docker run -d --name recommender-service-container -p 8081:8081 cavasini/recommender-service # Exemplo de porta diferente
                       echo "--- Deployment of RecommenderService complete ---"
 
-    deploy_userservice:
+    deploy_authservice:
         runs-on: ubuntu-latest
-        needs: [detect_changes, build_docker_userservice]
+        needs: [detect_changes, build_docker_authservice]
         environment: production
-        if: needs.detect_changes.outputs.userservice_changed == 'true' && always()
+        if: needs.detect_changes.outputs.authservice_changed == 'true' && always()
         steps:
-            - name: Deploy UserService to EC2
+            - name: Deploy AuthService to EC2
               uses: appleboy/ssh-action@v1.0.0
               with:
                   host: ${{ secrets.EC2_HOST }}
                   username: ${{ secrets.EC2_USERNAME }}
                   key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
                   script: |
-                      echo "--- Deploying UserService ---"
+                      echo "--- Deploying AuthService ---"
                       echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-                      docker stop user-service-container || true
-                      docker rm user-service-container || true
-                      docker rmi cavasini/user-service || true
-                      docker pull cavasini/user-service
-                      docker run -d --name user-service-container -p 8083:8083 cavasini/user-service # Exemplo de porta diferente
-                      echo "--- Deployment of UserService complete ---"
+                      docker stop auth-service-container || true
+                      docker rm auth-service-container || true
+                      docker rmi cavasini/auth-service || true
+                      docker pull cavasini/Auth-service
+                      docker run -d --name auth-service-container -p 8083:8083 cavasini/auth-service # Exemplo de porta diferente
+                      echo "--- Deployment of AuthService complete ---"
