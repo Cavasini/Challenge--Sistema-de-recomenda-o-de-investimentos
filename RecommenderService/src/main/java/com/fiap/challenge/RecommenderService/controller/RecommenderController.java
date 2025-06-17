@@ -30,6 +30,10 @@ public class RecommenderController {
 
     @PostMapping()
     public ResponseEntity<ResponseDTO> processRecommendationRequest(@RequestBody ProfileData profileData) {
+        System.out.println(profileData.getProfileClassification());
+        System.out.println(profileData.getTotalScore());
+        System.out.println(profileData.getUserId());
+
         if (profileData.getProfileClassification().equals("Conservador")) {
             ResponseDTO response = new ResponseDTO(
                     fixedIncomeAnalyzer.getFixedIncomesBasedOnProfile(InvestmentProfile.CONSERVATIVE),
@@ -49,7 +53,7 @@ public class RecommenderController {
                     fixedIncomeAnalyzer.getFixedIncomesBasedOnProfile(InvestmentProfile.AGGRESSIVE),
                     variableIncomeAnalyzer.getAndProcessGroupedVariableIncomes(InvestmentProfile.AGGRESSIVE)
             );
-            
+
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
