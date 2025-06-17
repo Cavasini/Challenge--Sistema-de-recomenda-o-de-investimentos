@@ -1,11 +1,10 @@
 package com.cava.AuthService.repository;
 
-import com.cava.AuthService.model.User;
+import com.cava.AuthService.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
 
 import java.util.UUID;
 
-public interface UserRepository extends JpaRepository<User, UUID> {
-    User findByEmail(String email);
+public interface UserRepository extends JpaRepository<Users, UUID> {
+    Users findByEmail(String email);
 }

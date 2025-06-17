@@ -18,15 +18,15 @@ public class ProfileAnalysisRequest {
     private Map<String, String> answers;
 
     @DecimalMin(value = "0.0", inclusive = true, message = "O valor do investimento inicial deve ser não negativo.")
-    private BigDecimal initialInvestmentValue; // Mantido, mesmo que não seja usado diretamente neste serviço
+    private BigDecimal monthlyInvestmentValue; // Mantido, mesmo que não seja usado diretamente neste serviço
 
     public ProfileAnalysisRequest() {
     }
 
-    public ProfileAnalysisRequest(String userId, Map<String, String> answers, BigDecimal initialInvestmentValue) {
+    public ProfileAnalysisRequest(String userId, Map<String, String> answers, BigDecimal monthlyInvestmentValue) {
         this.userId = userId;
         this.answers = answers;
-        this.initialInvestmentValue = initialInvestmentValue;
+        this.monthlyInvestmentValue = monthlyInvestmentValue;
     }
 
     // Getters e Setters
@@ -34,8 +34,8 @@ public class ProfileAnalysisRequest {
     public void setUserId(String userId) { this.userId = userId; }
     public Map<String, String> getAnswers() { return answers; }
     public void setAnswers(Map<String, String> answers) { this.answers = answers; }
-    public BigDecimal getInitialInvestmentValue() { return initialInvestmentValue; }
-    public void setInitialInvestmentValue(BigDecimal initialInvestmentValue) { this.initialInvestmentValue = initialInvestmentValue; }
+    public BigDecimal getInitialInvestmentValue() { return monthlyInvestmentValue; }
+    public void setInitialInvestmentValue(BigDecimal initialInvestmentValue) { this.monthlyInvestmentValue = monthlyInvestmentValue; }
 
     // Método de Validação Personalizada (Importante para este serviço)
     public void validateCustomAnswers() {
