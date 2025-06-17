@@ -145,7 +145,7 @@ jobs:
               working-directory: ./AuthService
               run: |
                   docker build -t cavasini/auth-service .
-                  docker push cavasini/authr-service
+                  docker push cavasini/auth-service
 
     # --- Jobs de Deploy para EC2 (Atualizados) ---
 
