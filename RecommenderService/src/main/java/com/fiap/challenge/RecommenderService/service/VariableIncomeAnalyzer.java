@@ -21,8 +21,8 @@ public class VariableIncomeAnalyzer {
         this.investmentDataServiceClient = investmentDataServiceClient;
     }
 
-    public List<StockScoreResult> getAndProcessGroupedVariableIncomes() {
-        Optional<List<String>> optionalVariableIncomes = investmentDataServiceClient.getVariableIncomesByProfile(InvestmentProfile.AGGRESSIVE);
+    public List<StockScoreResult> getAndProcessGroupedVariableIncomes(InvestmentProfile investmentProfile) {
+        Optional<List<String>> optionalVariableIncomes = investmentDataServiceClient.getVariableIncomesByProfile(investmentProfile);
 
         if (optionalVariableIncomes.isPresent()) {
             List<String> allSymbols = optionalVariableIncomes.get();
@@ -46,7 +46,7 @@ public class VariableIncomeAnalyzer {
 
             responsesForGroups.stream()
                     .forEach(stockDetailResponse -> stockDetailResponse.get().results().stream()
-                            .map(stockResult -> calculateScoreFromMetrics(stockDataMapper(stockResult), InvestmentProfile.AGGRESSIVE))
+                            .map(stockResult -> calculateScoreFromMetrics(stockDataMapper(stockResult), investmentProfile))
                             .filter(score -> score.score >= 5.0)
                             .forEach(stockScoreList::add));
 

@@ -1,15 +1,15 @@
-package com.fiap.challenge.ProfileAnalyzerService.model;
+package com.fiap.challenge.RecommenderService.model;
 
 import java.util.List;
 
 public class ProfileData {
     private String userId; // Pode ser útil para o próximo serviço associar os dados ao usuário
-    private int totalScore;
+    private Double totalScore;
     private String profileClassification; // Ex: "Conservador", "Moderado", "Sofisticado"
     private IdentifiedInterests identifiedInterests;
 
     // Construtor
-    public ProfileData(String userId, int totalScore, String profileClassification, IdentifiedInterests identifiedInterests) {
+    public ProfileData(String userId, Double totalScore, String profileClassification, IdentifiedInterests identifiedInterests) {
         this.userId = userId;
         this.totalScore = totalScore;
         this.profileClassification = profileClassification;
@@ -17,7 +17,7 @@ public class ProfileData {
     }
 
     public String getUserId() { return userId; }
-    public int getTotalScore() { return totalScore; }
+    public Double getTotalScore() { return totalScore; }
     public String getProfileClassification() { return profileClassification; }
     public IdentifiedInterests getIdentifiedInterests() { return identifiedInterests; }
 
