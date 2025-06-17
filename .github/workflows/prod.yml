@@ -8,13 +8,14 @@ on:
     #   branches: ["main"]
 
 jobs:
+    # ... (o job 'detect_changes' permanece o mesmo) ...
     detect_changes:
         runs-on: ubuntu-latest
         outputs:
             investmentdataservice_changed: ${{ steps.filter.outputs.investmentdataservice }}
             profileanalyzerservice_changed: ${{ steps.filter.outputs.profileanalyzerservice }}
             recommenderservice_changed: ${{ steps.filter.outputs.recommenderservice }}
-            authservice_changed: ${{ steps.filter.outputs.authservice }} # Adicionado
+            authservice_changed: ${{ steps.filter.outputs.authservice }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -27,18 +28,19 @@ jobs:
               with:
                   filters: |
                       investmentdataservice:
-                          - 'InvestmentDataService/**'
-                          - '.github/workflows/ci-cd-main.yml'
+                        - 'InvestmentDataService/**'
+                        - '.github/workflows/ci-cd-main.yml'
                       profileanalyzerservice:
-                          - 'ProfileAnalyzerService/**'
-                          - '.github/workflows/ci-cd-main.yml'
+                        - 'ProfileAnalyzerService/**'
+                        - '.github/workflows/ci-cd-main.yml'
                       recommenderservice:
-                          - 'RecommenderService/**'
-                          - '.github/workflows/ci-cd-main.yml'
-                      authservice: # Adicionado
-                          - 'AuthService/**' # CORRIGIDO AQUI!
-                          - '.github/workflows/ci-cd-main.yml'
+                        - 'RecommenderService/**'
+                        - '.github/workflows/ci-cd-main.yml'
+                      authservice:
+                        - 'RecommenderService/**'
+                        - '.github/workflows/ci-cd-main.yml'
 
+    # ... (os jobs 'build_docker_<servico>' permanecem os mesmos) ...
     build_docker_investmentdataservice:
         runs-on: ubuntu-latest
         needs: detect_changes
@@ -120,7 +122,7 @@ jobs:
                   docker build -t cavasini/recommender-service .
                   docker push cavasini/recommender-service
 
-    build_docker_authservice: # Adicionado
+    build_docker_authservice:
         runs-on: ubuntu-latest
         needs: detect_changes
         environment: production
@@ -151,24 +153,39 @@ jobs:
 
     deploy_investmentdataservice:
         runs-on: ubuntu-latest
-        needs: [detect_changes, build_docker_investmentdataservice]
+        needs: [detect_changes, build_docker_investmentdataservice] # Depende da detecção e do build/push do InvestmentDataService
         environment: production
-        if: needs.detect_changes.outputs.investmentdataservice_changed == 'true' && always()
+        if: needs.detect_changes.outputs.investmentdataservice_changed == 'true' && always() # `always()` para rodar mesmo se build_docker_investmentdataservice falhar (opcional)
         steps:
             - name: Deploy InvestmentDataService to EC2
-              uses: appleboy/ssh-action@v1.0.0
+              uses: appleboy/ssh-action@v1.0.0 # Usaremos esta action para SSH
               with:
                   host: ${{ secrets.EC2_HOST }}
                   username: ${{ secrets.EC2_USERNAME }}
                   key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
                   script: |
                       echo "--- Deploying InvestmentDataService ---"
+                      # Navegar para o diretório do projeto ou onde você gerencia seus containers
+                      # cd /home/${{ secrets.EC2_USERNAME }}/my-app/investmentdataservice
+
+                      # Fazer login no Docker Hub na EC2 (se ainda não estiver logado ou token expirar)
+                      # Use as mesmas credenciais do Docker Hub
                       echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-                      docker stop investmentdata-service-container || true
+
+                      # Parar e remover o container existente (se houver)
+                      docker stop investmentdata-service-container || true # '|| true' evita que o workflow falhe se o container não existir
                       docker rm investmentdata-service-container || true
+
+                      # Remover a imagem antiga para garantir que a nova seja puxada
                       docker rmi cavasini/investmentdata-service || true
+
+                      # Puxar a nova imagem
                       docker pull cavasini/investmentdata-service
+
+                      # Rodar o novo container (ajuste as portas e volumes conforme sua necessidade)
+                      # Exemplo: mapeando porta 8080 do container para 80 do host
                       docker run -d --name investmentdata-service-container -p 80:8080 cavasini/investmentdata-service
+
                       echo "--- Deployment of InvestmentDataService complete ---"
 
     deploy_profileanalyzerservice:
@@ -186,11 +203,14 @@ jobs:
                   script: |
                       echo "--- Deploying ProfileAnalyzerService ---"
                       echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
                       docker stop profileanalyzer-service-container || true
                       docker rm profileanalyzer-service-container || true
                       docker rmi cavasini/profileanalyzer-service || true
+
                       docker pull cavasini/profileanalyzer-service
-                      docker run -d --name profileanalyzer-service-container -p 8081:8080 cavasini/profileanalyzer-service
+
+                      docker run -d --name profileanalyzer-service-container -p 8081:8080 cavasini/profileanalyzer-service # Exemplo de porta diferente
                       echo "--- Deployment of ProfileAnalyzerService complete ---"
 
     deploy_recommenderservice:
@@ -208,14 +228,17 @@ jobs:
                   script: |
                       echo "--- Deploying RecommenderService ---"
                       echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
                       docker stop recommender-service-container || true
                       docker rm recommender-service-container || true
                       docker rmi cavasini/recommender-service || true
+
                       docker pull cavasini/recommender-service
-                      docker run -d --name recommender-service-container -p 8082:8080 cavasini/recommender-service
+
+                      docker run -d --name recommender-service-container -p 8082:8080 cavasini/recommender-service # Exemplo de porta diferente
                       echo "--- Deployment of RecommenderService complete ---"
 
-    deploy_authservice: # Adicionado
+    deploy_authservice:
         runs-on: ubuntu-latest
         needs: [detect_changes, build_docker_authservice]
         environment: production
@@ -230,9 +253,12 @@ jobs:
                   script: |
                       echo "--- Deploying AuthService ---"
                       echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
                       docker stop auth-service-container || true
                       docker rm auth-service-container || true
                       docker rmi cavasini/auth-service || true
+
                       docker pull cavasini/auth-service
-                      docker run -d --name auth-service-container -p 8083:8080 cavasini/auth-service # Exemplo de porta diferente
+
+                      docker run -d --name auth-service-container -p 8082:8080 cavasini/auth-service # Exemplo de porta diferente
                       echo "--- Deployment of AuthService complete ---"
