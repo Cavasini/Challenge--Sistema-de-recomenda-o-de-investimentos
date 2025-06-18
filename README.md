@@ -1,5 +1,7 @@
 # 💸 Sistema de Recomendação de Investimentos
 
+🔗 **Acesse o projeto:** [https://v0-investimento-perfil.vercel.app/](https://v0-investimento-perfil.vercel.app/)
+
 Este projeto é um **sistema de recomendação de investimentos personalizado**, que utiliza o perfil do usuário como base para sugerir ativos (ações, fundos e investimentos) alinhados aos seus objetivos, tolerância ao risco e interesses sociais e macroeconômicos.
 
 ---
