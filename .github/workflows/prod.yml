@@ -242,6 +242,5 @@ jobs:
               docker rm auth-service-container || true
               docker rmi cavasini/auth-service || true
               docker pull cavasini/auth-service
-              # docker run -d --name auth-service-container -p 8081:8081 cavasini/auth-service # Exemplo de porta diferente
-              docker run -d --name auth-service-container --network investment-network -p 8081:8081 cavasini/auth-service
+              docker run -d --name auth-service-container --network investment-network -p 8083:8010 cavasini/auth-service
               echo "--- Deployment of AuthService complete ---"
