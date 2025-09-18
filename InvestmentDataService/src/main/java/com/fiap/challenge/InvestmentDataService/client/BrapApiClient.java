@@ -72,6 +72,7 @@ public class BrapApiClient {
                 .queryParam("historical", "True")
                 .queryParam("start", previousMonthFormatted)
                 .queryParam("end", todayFormatted)
+                .queryParam("token", authorizationHeaderValue)
                 .toUriString();
 
         return executeGetRequest(url, BrapApiResponseInflation.class)
@@ -90,6 +91,7 @@ public class BrapApiClient {
                 .queryParam("historical", "True")
                 .queryParam("start", todayFormatted)
                 .queryParam("end", todayFormatted)
+                .queryParam("token", authorizationHeaderValue)
                 .toUriString();
 
         return executeGetRequest(url, BrapApiResponsePrimeRate.class)
