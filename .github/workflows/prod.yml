@@ -38,7 +38,7 @@ jobs:
                         - '.github/workflows/ci-cd-main.yml'
                       authservice:
                         - 'AuthService/**'
-                        - '.github/workflows/ci-cd-main.yml
+                        - '.github/workflows/ci-cd-main.yml'
     # ... (os jobs 'build_docker_<servico>' permanecem os mesmos) ...
     build_docker_investmentdataservice:
         runs-on: ubuntu-latest
