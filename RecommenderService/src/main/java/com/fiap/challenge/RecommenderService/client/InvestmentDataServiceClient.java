@@ -22,7 +22,7 @@ public class InvestmentDataServiceClient {
 
     private static final Logger log = LoggerFactory.getLogger(InvestmentDataServiceClient.class);
 
-    private String brapiBaseUrl = "http://investmentdata-service-container:8082/api";
+    private String brapiBaseUrl = "http://investmentdata-service-container:8083/api";
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
