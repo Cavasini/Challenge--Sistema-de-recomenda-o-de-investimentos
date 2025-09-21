@@ -177,7 +177,7 @@ jobs:
                       # Rodar o novo container (ajuste as portas e volumes conforme sua necessidade)
                       # Exemplo: mapeando porta 8080 do container para 80 do host
                       # docker run -d --name investmentdata-service-container -p 8083:8082 -e BRAP_API_AUTH_TOKEN=${{ secrets.BRAP_API_AUTH_TOKEN }}  cavasini/investmentdata-service
-                      docker run -d --name investmentdata-service-container --network challenge--sistema-de-recomenda-o-de-investimentos_default -p 8083:8082 -e BRAP_API_AUTH_TOKEN=${{ secrets.BRAP_API_AUTH_TOKEN }} -e 'INVESTMENT.PATH=investmentdata-service-container' cavasini/investmentdata-service
+                      docker run -d --name investmentdata-service-container --network challenge--sistema-de-recomenda-o-de-investimentos_default -p 8083:8082 -e BRAP_API_AUTH_TOKEN=${{ secrets.BRAP_API_AUTH_TOKEN }} cavasini/investmentdata-service
                       echo "--- Deployment of InvestmentDataService complete ---"
     deploy_profileanalyzerservice:
         runs-on: ubuntu-latest
@@ -221,7 +221,7 @@ jobs:
                       docker rmi cavasini/recommender-service || true
                       docker pull cavasini/recommender-service
                       # docker run -d --name recommender-service-container -p 8081:8081 cavasini/recommender-service # Exemplo de porta diferente
-                      docker run -d --name recommender-service-container --network challenge--sistema-de-recomenda-o-de-investimentos_default -p 8081:8081 cavasini/recommender-service
+                      docker run -d --name recommender-service-container --network challenge--sistema-de-recomenda-o-de-investimentos_default -e 'INVESTMENT.PATH=investmentdata-service-container' -p 8081:8081 cavasini/recommender-service
                       echo "--- Deployment of RecommenderService complete ---"
     deploy_authservice:
       runs-on: ubuntu-latest
