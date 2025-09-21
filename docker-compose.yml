@@ -13,7 +13,7 @@ services:
             - "5433:5432"
         volumes:
             - db-data:/var/lib/postgresql/data
-            - .AuthService/init-scripts:/docker-entrypoint-initdb.d
+            - ./init-scripts:/docker-entrypoint-initdb.d
 
     mongo-db:
         image: mongo:latest
