@@ -3,11 +3,9 @@ package com.fiap.challenge.RecommenderService.controller;
 import com.fiap.challenge.RecommenderService.client.dto.FixedIncomeDTO;
 import com.fiap.challenge.RecommenderService.client.dto.StockDetailResponse;
 import com.fiap.challenge.RecommenderService.client.dto.VariableIncomeResponse;
-import com.fiap.challenge.RecommenderService.model.InvestmentProfile;
-import com.fiap.challenge.RecommenderService.model.ProfileData;
-import com.fiap.challenge.RecommenderService.model.ResponseDTO;
-import com.fiap.challenge.RecommenderService.model.StockScoreResult;
+import com.fiap.challenge.RecommenderService.model.*;
 import com.fiap.challenge.RecommenderService.service.FixedIncomeAnalyzer;
+import com.fiap.challenge.RecommenderService.service.PortfolioService;
 import com.fiap.challenge.RecommenderService.service.VariableIncomeAnalyzer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,40 +20,46 @@ public class RecommenderController {
 
     private final FixedIncomeAnalyzer fixedIncomeAnalyzer;
     private final VariableIncomeAnalyzer variableIncomeAnalyzer;
+    private final PortfolioService portfolioService;
 
-    public RecommenderController(FixedIncomeAnalyzer fixedIncomeAnalyzer, VariableIncomeAnalyzer variableIncomeAnalyzer){
+    public RecommenderController(FixedIncomeAnalyzer fixedIncomeAnalyzer, VariableIncomeAnalyzer variableIncomeAnalyzer, PortfolioService portfolioService){
         this.fixedIncomeAnalyzer = fixedIncomeAnalyzer;
         this.variableIncomeAnalyzer = variableIncomeAnalyzer;
+        this.portfolioService = portfolioService;
     }
 
     @PostMapping()
-    public ResponseEntity<ResponseDTO> processRecommendationRequest(@RequestBody ProfileData profileData) {
+    public ResponseEntity<?> processRecommendationRequest(@RequestBody ProfileData profileData) {
         System.out.println(profileData.getProfileClassification());
         System.out.println(profileData.getTotalScore());
         System.out.println(profileData.getUserId());
+        InvestmentProfile profile;
 
         if (profileData.getProfileClassification().equals("Conservador")) {
-            ResponseDTO response = new ResponseDTO(
-                    fixedIncomeAnalyzer.getFixedIncomesBasedOnProfile(InvestmentProfile.CONSERVATIVE),
-                    variableIncomeAnalyzer.getAndProcessGroupedVariableIncomes(InvestmentProfile.CONSERVATIVE)
-            );
-
-            return ResponseEntity.ok(response);
+            profile = InvestmentProfile.CONSERVATIVE;
         } else if (profileData.getProfileClassification().equals("Moderado")) {
-            ResponseDTO response = new ResponseDTO(
-                    fixedIncomeAnalyzer.getFixedIncomesBasedOnProfile(InvestmentProfile.MODERATE),
-                    variableIncomeAnalyzer.getAndProcessGroupedVariableIncomes(InvestmentProfile.MODERATE)
-            );
-
-            return ResponseEntity.ok(response);
+            profile = InvestmentProfile.MODERATE;
         } else if (profileData.getProfileClassification().equals("Sofisticado")) {
-            ResponseDTO response = new ResponseDTO(
-                    fixedIncomeAnalyzer.getFixedIncomesBasedOnProfile(InvestmentProfile.AGGRESSIVE),
-                    variableIncomeAnalyzer.getAndProcessGroupedVariableIncomes(InvestmentProfile.AGGRESSIVE)
-            );
-
-            return ResponseEntity.ok(response);
+            profile = InvestmentProfile.AGGRESSIVE;
+        } else {
+            return ResponseEntity.badRequest().body("O perfil de classificação informado é inválido.");
         }
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+
+        ResponseDTO response = new ResponseDTO(
+                fixedIncomeAnalyzer.getFixedIncomesBasedOnProfile(profile),
+                variableIncomeAnalyzer.getAndProcessGroupedVariableIncomes(profile)
+        );
+
+
+        try {
+            UserRecomendation newPortfolio = new UserRecomendation();
+            newPortfolio.setUserProfile(profileData);
+            newPortfolio.setInvestmentRecommendations(response);
+            portfolioService.savePortfolio(newPortfolio);
+        } catch (Exception e) {
+            throw new RuntimeException("Não foi possível salvar o portfólio no banco de dados. ERROR: " + e.getMessage(), e);
+        }
+
+        return ResponseEntity.ok(response);
     }
 }

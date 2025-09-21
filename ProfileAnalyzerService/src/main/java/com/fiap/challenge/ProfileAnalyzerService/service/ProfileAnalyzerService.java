@@ -8,46 +8,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-// Importe os DTOs
-// import com.seuprojeto.dto.ProfileAnalysisRequest; // DTO de Request
-// import com.seuprojeto.dto.ProfileData; // DTO de Response
-// import com.seuprojeto.dto.ProfileData.IdentifiedInterests; // Classe aninhada do ProfileData
 
 @Service
 public class ProfileAnalyzerService {
 
-    /**
-     * Processa as respostas do questionário do usuário, calcula o score,
-     * classifica o perfil de investimento e identifica interesses específicos.
-     *
-     * @param request O DTO de requisição contendo as respostas do usuário.
-     * @return Um objeto ProfileData que resume o perfil analisado do usuário.
-     */
     public ProfileData analyzeAndClassifyProfile(ProfileAnalysisRequest request) {
-        // A validação customizada (request.validateCustomAnswers()) deve ser chamada
-        // na camada de Controller antes de invocar este serviço,
-        // ou você pode chamá-la aqui se preferir.
-        // Exemplo: request.validateCustomAnswers();
-
-        // 1. Calcular o score total
         int totalScore = calculateScore(request.getAnswers());
 
-        // 2. Classificar o perfil principal
         String profileClassification = classifyProfile(totalScore);
 
-        // 3. Identificar interesses específicos (flags)
         ProfileData.IdentifiedInterests interests = identifySpecificInterests(request.getAnswers(), profileClassification);
 
-        // 4. Retornar o ProfileData encapsulado para o próximo serviço
         return new ProfileData(
-                request.getUserId(), // Passa o userId para o ProfileData
+                request.getUserId(),
                 totalScore,
                 profileClassification,
                 interests
         );
     }
 
-    // --- Métodos Privados de Lógica (Mesmos da resposta anterior) ---
 
     private int calculateScore(Map<String, String> answers) {
         int score = 0;

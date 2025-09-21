@@ -29,7 +29,6 @@ public class ProfileAnalysisRequest {
         this.monthlyInvestmentValue = monthlyInvestmentValue;
     }
 
-    // Getters e Setters
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
     public Map<String, String> getAnswers() { return answers; }
@@ -37,7 +36,6 @@ public class ProfileAnalysisRequest {
     public BigDecimal getInitialInvestmentValue() { return monthlyInvestmentValue; }
     public void setInitialInvestmentValue(BigDecimal initialInvestmentValue) { this.monthlyInvestmentValue = monthlyInvestmentValue; }
 
-    // Método de Validação Personalizada (Importante para este serviço)
     public void validateCustomAnswers() {
         if (answers == null) {
             throw new IllegalArgumentException("As respostas não podem ser nulas.");

@@ -8,7 +8,6 @@ public class ProfileData {
     private String profileClassification; // Ex: "Conservador", "Moderado", "Sofisticado"
     private IdentifiedInterests identifiedInterests;
 
-    // Construtor
     public ProfileData(String userId, int totalScore, String profileClassification, IdentifiedInterests identifiedInterests) {
         this.userId = userId;
         this.totalScore = totalScore;
@@ -28,7 +27,6 @@ public class ProfileData {
         private List<String> macroeconomicConcerns; // Ex: ["inflation", "interestRates"]
         private String riskToleranceNotes; // Observações sobre a tolerância ao risco
 
-        // Construtor
         public IdentifiedInterests(boolean liquidityNeeded, String esgInterest, List<String> macroeconomicConcerns, String riskToleranceNotes) {
             this.liquidityNeeded = liquidityNeeded;
             this.esgInterest = esgInterest;
@@ -36,7 +34,6 @@ public class ProfileData {
             this.riskToleranceNotes = riskToleranceNotes;
         }
 
-        // Getters
         public boolean isLiquidityNeeded() { return liquidityNeeded; }
         public String getEsgInterest() { return esgInterest; }
         public List<String> getMacroeconomicConcerns() { return macroeconomicConcerns; }
