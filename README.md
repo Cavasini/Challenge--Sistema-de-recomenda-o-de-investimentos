@@ -207,10 +207,23 @@ Este sistema foi **deployado na AWS** utilizando **boas práticas de CI/CD**, ga
 
 ---
 
+## Desenho da Arquitetura do Sistema
+
+![Logo do Projeto](./image1.png)
+
+## Desenho das melhorias futuras para o sistema
+
+![Logo do Projeto](./image2.png)
+---
+
+
 ## 👨‍💻 Autor
 
 - Julia Amorim - RM99609
 - Lana Leite - RM551143
 - Matheus Cavasini - RM97722
+
+
+
 
 
