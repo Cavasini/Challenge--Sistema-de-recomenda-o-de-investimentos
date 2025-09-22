@@ -209,7 +209,6 @@ Este sistema foi **deployado na AWS** utilizando **boas práticas de CI/CD**, ga
 
 ## 👨‍💻 Autor
 
-- Emanuelle Soares - RM97973
 - Julia Amorim - RM99609
 - Lana Leite - RM551143
 - Matheus Cavasini - RM97722
