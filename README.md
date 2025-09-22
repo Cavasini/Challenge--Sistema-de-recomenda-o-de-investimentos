@@ -179,14 +179,21 @@ Abaixo está um exemplo completo da resposta da API:
 
 ---
 
-## 🚀 Executando com Docker
+## 🚀 Executando o Projeto Localmente
 
-Para executar todos os serviços juntos:
+Para executar o projeto em seu ambiente local, siga os passos abaixo:
 
+**1. Clone o repositório:**
 ```bash
-docker-compose up --build
+git clone https://github.com/Cavasini/Challenge--Sistema-de-recomenda-o-de-investimentos.git
 ```
 
+**2. Inicie os containers com Docker Compose:**
+Navegue até a pasta local e execute o comando abaixo. Com isso, todos os serviços e o banco de dados serão inicializados em um container Docker e poderão ser testados localmente.
+```bash
+cd local
+docker-compose up -d
+```
 ---
 
 ## ☁️ Deploy em Produção
