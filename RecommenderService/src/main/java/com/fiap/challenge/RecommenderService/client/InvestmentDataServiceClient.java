@@ -35,7 +35,9 @@ public class InvestmentDataServiceClient {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
 
-        System.out.println(path);
+        if(path == null){
+            brapiBaseUrl = "http://"investmentdata-service-container":8083/api";
+        }
     }
 
 
