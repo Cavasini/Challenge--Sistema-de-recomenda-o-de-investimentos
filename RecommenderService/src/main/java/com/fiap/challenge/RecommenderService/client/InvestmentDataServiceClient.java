@@ -26,7 +26,7 @@ public class InvestmentDataServiceClient {
     @Value("${investment.path}")
     private String path;
 
-    private String brapiBaseUrl = "http://"+ path + ":8083/api";
+    private String brapiBaseUrl = "http://"+ path + ":8082/api";
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -36,7 +36,7 @@ public class InvestmentDataServiceClient {
         this.objectMapper = objectMapper;
 
         if(path == null){
-            brapiBaseUrl = "http://investmentdata-service-container:8083/api";
+            brapiBaseUrl = "http://investmentdata-service-container:8082/api";
         }
     }
 
