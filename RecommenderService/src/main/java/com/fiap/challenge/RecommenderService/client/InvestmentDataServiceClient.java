@@ -36,7 +36,7 @@ public class InvestmentDataServiceClient {
         this.objectMapper = objectMapper;
 
         if(path == null){
-            brapiBaseUrl = "http://investmentdata-service-container:8082/api";
+            brapiBaseUrl = "http://investmentdata-service-container:8083/api";
         }
     }
 

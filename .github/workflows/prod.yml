@@ -174,7 +174,7 @@ jobs:
                       docker pull cavasini/investmentdata-service
                       # Rodar o novo container (ajuste as portas e volumes conforme sua necessidade)
                       # Exemplo: mapeando porta 8080 do container para 80 do host
-                      # docker run -d --name investmentdata-service-container -p 8083:8082 -e BRAP_API_AUTH_TOKEN=${{ secrets.BRAP_API_AUTH_TOKEN }}  cavasini/investmentdata-service
+                      # docker run -d --name investmentdata-service-container -p 8083:8083 -e BRAP_API_AUTH_TOKEN=${{ secrets.BRAP_API_AUTH_TOKEN }}  cavasini/investmentdata-service
                       docker run -d --name investmentdata-service-container --network mongo_default -p 8083:8082 -e BRAP_API_AUTH_TOKEN=${{ secrets.BRAP_API_AUTH_TOKEN }} cavasini/investmentdata-service
                       echo "--- Deployment of InvestmentDataService complete ---"
     deploy_profileanalyzerservice:
