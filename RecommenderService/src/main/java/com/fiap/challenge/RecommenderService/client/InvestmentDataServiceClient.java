@@ -34,6 +34,8 @@ public class InvestmentDataServiceClient {
     public InvestmentDataServiceClient(RestTemplate restTemplate, ObjectMapper objectMapper){
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+
+        System.out.println(path);
     }
 
 
