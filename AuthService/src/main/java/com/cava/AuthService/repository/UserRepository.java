@@ -7,5 +7,9 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.UUID;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
+    User findUserById(UUID id);
+
+    User findUserByUsername(String username);
+    boolean existsUserByEmail(String email);
     User findByEmail(String email);
 }

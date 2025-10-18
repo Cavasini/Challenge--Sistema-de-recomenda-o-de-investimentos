@@ -27,6 +27,9 @@ public class User implements UserDetails {
     private UUID id;
 
     @Column(nullable = false, unique = true, length = 255)
+    private String username;
+
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
     @Column(nullable = false)
@@ -37,10 +40,11 @@ public class User implements UserDetails {
     private UserRole role;
 
 
-    public User(String login, String password, UserRole role) {
+    public User(String username,String login, String password) {
+        this.username = username;
         this.email = login;
         this.password = password;
-        this.role = role;
+        this.role = UserRole.USER;
     }
 
     @Override
@@ -90,4 +94,6 @@ public class User implements UserDetails {
     public UserRole getRole() {
         return role;
     }
+
+
 }
