@@ -1,6 +1,5 @@
 package com.cava.AuthService.controller;
 
-import com.cava.AuthService.config.RsaKeyConfig;
 import com.cava.AuthService.infra.security.TokenService;
 import com.cava.AuthService.model.*;
 import com.cava.AuthService.repository.UserRepository;
@@ -26,9 +25,6 @@ public class AuthenticationController {
 
     @Autowired
     private TokenService tokenService;
-
-    @Autowired
-    private RsaKeyConfig rsaKeyConfig;
 
 
     @PostMapping("/login")
