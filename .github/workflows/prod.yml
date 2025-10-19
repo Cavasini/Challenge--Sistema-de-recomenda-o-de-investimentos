@@ -240,5 +240,5 @@ jobs:
               docker rm auth-service-container || true
               docker rmi cavasini/auth-service || true
               docker pull cavasini/auth-service
-              docker run -d --name auth-service-container --network postgres_default -p 8082:8010 cavasini/auth-service
+              docker run -d --name auth-service-container --network postgres_default -e JWT_SECRET_ENV=${{ secrets.JWT_SECRET_ENV }} -p 8082:8010 cavasini/auth-service
               echo "--- Deployment of AuthService complete ---"
