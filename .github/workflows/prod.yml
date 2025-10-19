@@ -197,7 +197,7 @@ jobs:
                       docker rmi cavasini/profileanalyzer-service || true
                       docker pull cavasini/profileanalyzer-service
                       # docker run -d --name profileanalyzer-service-container -p 8080:8080 cavasini/profileanalyzer-service # Exemplo de porta diferente
-                      docker run -d --name profileanalyzer-service-container --network postgres_default -p 8080:8080 cavasini/profileanalyzer-service
+                      docker run -d --name profileanalyzer-service-container --network postgres_default -e JWT_SECRET_ENV=${{ secrets.JWT_SECRET_ENV }} -p 8080:8080 cavasini/profileanalyzer-service
                       echo "--- Deployment of ProfileAnalyzerService complete ---"
     deploy_recommenderservice:
         runs-on: ubuntu-latest
