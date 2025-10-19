@@ -28,7 +28,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/login")
-    public ResponseEntity login(@Valid @RequestBody AuthenticationDTO data) throws Exception {
+    public ResponseEntity login(@Valid @RequestBody AuthenticationDto data) throws Exception {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var auth = authenticationManager.authenticate(usernamePassword);
 
