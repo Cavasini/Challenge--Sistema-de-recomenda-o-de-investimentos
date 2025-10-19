@@ -69,7 +69,7 @@ public record StockResult(
                     BalanceSheetStatement statement = objectMapper.convertValue(item, BalanceSheetStatement.class);
                     parsedStatements.add(statement);
                 } catch (IllegalArgumentException e) {
-                    System.err.println("Erro ao mapear BalanceSheetStatement: " + e.getMessage());
+//                    System.err.println("Erro ao mapear BalanceSheetStatement: " + e.getMessage());
                 }
             } else if (item instanceof BalanceSheetStatement) {
                 // Caso raro onde já foi desserializado (se o Jackson fizer isso automaticamente)

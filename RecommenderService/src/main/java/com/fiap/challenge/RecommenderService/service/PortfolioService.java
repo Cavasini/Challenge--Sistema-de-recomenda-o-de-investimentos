@@ -22,6 +22,12 @@ public class PortfolioService {
         return repository.save(portfolio);
     }
 
+    public void deletePortfolio(String userId){
+        System.out.println("Deletando Portifólio do usuário: " + userId);
+        repository.deleteById(userId);
+    }
+
+
     public UserRecomendation getPortfolioByUser(String userId) {
         return repository.findByUserProfileUserId(userId)
                 .orElseThrow(() -> new ResponseStatusException(
