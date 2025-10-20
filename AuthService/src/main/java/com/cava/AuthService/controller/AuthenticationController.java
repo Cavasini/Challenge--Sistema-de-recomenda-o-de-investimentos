@@ -33,7 +33,10 @@ public class AuthenticationController {
         var auth = authenticationManager.authenticate(usernamePassword);
 
         var token = tokenService.generateToken((User) auth.getPrincipal());
-        return ResponseEntity.ok(new LoginResponseDTO(((User) auth.getPrincipal()).getUsername(),token));
+
+        var userData = new UserLogin(((User) auth.getPrincipal()).getId().toString(), ((User) auth.getPrincipal()).getUsername(), ((User) auth.getPrincipal()).getEmail());
+        var authData = new AuthData(token,"Bearer", 7200);
+        return ResponseEntity.ok(new LoginResponseDTO(userData,authData));
     }
 
     @PostMapping("/register")
