@@ -219,7 +219,7 @@ jobs:
                       docker rmi cavasini/recommender-service || true
                       docker pull cavasini/recommender-service
                       # docker run -d --name recommender-service-container -p 8081:8081 cavasini/recommender-service # Exemplo de porta diferente
-                      docker run -d --name recommender-service-container --network mongo_default -e INVESTMENT_PATH=investmentdata-service-container JWT_SECRET_ENV=${{ secrets.JWT_SECRET_ENV }} -p 8081:8081 cavasini/recommender-service
+                      docker run -d --name recommender-service-container --network mongo_default -e INVESTMENT_PATH=investmentdata-service-container -e JWT_SECRET_ENV=${{ secrets.JWT_SECRET_ENV }} -p 8081:8081 cavasini/recommender-service
                       echo "--- Deployment of RecommenderService complete ---"
     deploy_authservice:
       runs-on: ubuntu-latest
