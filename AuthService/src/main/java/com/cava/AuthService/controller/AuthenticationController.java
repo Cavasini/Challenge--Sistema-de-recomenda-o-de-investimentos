@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -28,15 +29,23 @@ public class AuthenticationController {
 
 
     @PostMapping("/login")
-    public ResponseEntity login(@Valid @RequestBody AuthenticationDto data) throws Exception {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
-        var auth = authenticationManager.authenticate(usernamePassword);
+    public ResponseEntity login(@Valid @RequestBody AuthenticationDto data) {
+        try {
+            var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
+            var auth = authenticationManager.authenticate(usernamePassword);
 
-        var token = tokenService.generateToken((User) auth.getPrincipal());
+            var token = tokenService.generateToken((User) auth.getPrincipal());
 
-        var userData = new UserLogin(((User) auth.getPrincipal()).getId().toString(), ((User) auth.getPrincipal()).getUsername(), ((User) auth.getPrincipal()).getEmail());
-        var authData = new AuthData(token,"Bearer", 7200);
-        return ResponseEntity.ok(new LoginResponseDTO(userData,authData));
+            var userData = new UserLogin(((User) auth.getPrincipal()).getId().toString(), ((User) auth.getPrincipal()).getUsername(), ((User) auth.getPrincipal()).getEmail());
+            var authData = new AuthData(token, "Bearer", 7200);
+            return ResponseEntity.ok(new LoginResponseDTO(userData, authData));
+        }catch (BadCredentialsException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Usuário não registrado ou senha inválida");
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erro inesperado: " + e.getMessage());
+        }
     }
 
     @PostMapping("/register")
