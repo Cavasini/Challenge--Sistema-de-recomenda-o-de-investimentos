@@ -1,6 +1,6 @@
 package com.cava.AuthService.controller;
 
-import com.cava.AuthService.infra.security.TokenService;
+import com.cava.AuthService.service.TokenService;
 import com.cava.AuthService.model.*;
 import com.cava.AuthService.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -50,7 +50,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity register(@Valid @RequestBody RegisterRequestDTO data){
-        if(this.userRepository.existsUserByEmail(data.email())) return ResponseEntity.badRequest().body("User already exists");
+        if(this.userRepository.existsUserByEmailOrUsername(data.email(), data.username())) return ResponseEntity.badRequest().body("Username or Email already used!");
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
         User newUser = new User(data.username() ,data.email(), encryptedPassword);

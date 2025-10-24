@@ -1,7 +1,7 @@
 package com.cava.AuthService.infra.security;
 
-import com.cava.AuthService.model.User;
 import com.cava.AuthService.repository.UserRepository;
+import com.cava.AuthService.service.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
