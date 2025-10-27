@@ -1,6 +1,6 @@
 package com.fiap.challenge.RecommenderService.model;
 
-public class StockScoreResult {
+public class StockScoreResult implements InvestimentRecommendation{
     public String ticket;
     public String longName;
     public String currency;

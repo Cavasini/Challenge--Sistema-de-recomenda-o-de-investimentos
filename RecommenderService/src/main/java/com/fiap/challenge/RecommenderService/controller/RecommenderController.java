@@ -47,8 +47,8 @@ public class RecommenderController {
         }
 
         ResponseDTO response = new ResponseDTO(
-                fixedIncomeAnalyzer.getFixedIncomesBasedOnProfile(profile),
-                variableIncomeAnalyzer.getAndProcessGroupedVariableIncomes(profile)
+                fixedIncomeAnalyzer.analyze(profile),
+                variableIncomeAnalyzer.analyze(profile)
         );
 
 

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class FixedIncomeAnalyzer {
+public class FixedIncomeAnalyzer implements InvestimentAnalyzer {
 
     private final InvestmentDataServiceClient investmentDataServiceClient;
 
@@ -19,7 +19,8 @@ public class FixedIncomeAnalyzer {
         this.investmentDataServiceClient = investmentDataServiceClient;
     }
 
-    public List<FixedIncomeDTO> getFixedIncomesBasedOnProfile(InvestmentProfile profile) {
+    @Override
+    public List analyze(InvestmentProfile profile) {
         InvestmentDataResponse response = investmentDataServiceClient.getFixedIncome().get();
         return filterBestFixedIncomes(
                 response.fixedIncomeList(),
@@ -28,6 +29,16 @@ public class FixedIncomeAnalyzer {
                 profile
         );
     }
+
+//    public List<FixedIncomeDTO> getFixedIncomesBasedOnProfile(InvestmentProfile profile) {
+//        InvestmentDataResponse response = investmentDataServiceClient.getFixedIncome().get();
+//        return filterBestFixedIncomes(
+//                response.fixedIncomeList(),
+//                Double.parseDouble(response.inflation()),
+//                Double.parseDouble(response.primeRate()),
+//                profile
+//        );
+//    }
 
     private List<FixedIncomeDTO> filterBestFixedIncomes(List<FixedIncomeDTO> all,
                                                         double inflation,

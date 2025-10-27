@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class VariableIncomeAnalyzer {
+public class VariableIncomeAnalyzer implements InvestimentAnalyzer{
 
     private final InvestmentDataServiceClient investmentDataServiceClient;
 
@@ -21,8 +21,9 @@ public class VariableIncomeAnalyzer {
         this.investmentDataServiceClient = investmentDataServiceClient;
     }
 
-    public List<StockScoreResult> getAndProcessGroupedVariableIncomes(InvestmentProfile investmentProfile) {
-        Optional<List<String>> optionalVariableIncomes = investmentDataServiceClient.getVariableIncomesByProfile(investmentProfile);
+    @Override
+    public List analyze(InvestmentProfile profile) {
+        Optional<List<String>> optionalVariableIncomes = investmentDataServiceClient.getVariableIncomesByProfile(profile);
 
         if (optionalVariableIncomes.isPresent()) {
             List<String> allSymbols = optionalVariableIncomes.get();
@@ -46,7 +47,7 @@ public class VariableIncomeAnalyzer {
 
             responsesForGroups.stream()
                     .forEach(stockDetailResponse -> stockDetailResponse.get().results().stream()
-                            .map(stockResult -> calculateScoreFromMetrics(stockDataMapper(stockResult), investmentProfile))
+                            .map(stockResult -> calculateScoreFromMetrics(stockDataMapper(stockResult), profile))
                             .filter(score -> score.score >= 5.0)
                             .forEach(stockScoreList::add));
 
@@ -58,6 +59,44 @@ public class VariableIncomeAnalyzer {
             return Collections.emptyList();
         }
     }
+
+//    public List<StockScoreResult> getAndProcessGroupedVariableIncomes(InvestmentProfile investmentProfile) {
+//        Optional<List<String>> optionalVariableIncomes = investmentDataServiceClient.getVariableIncomesByProfile(investmentProfile);
+//
+//        if (optionalVariableIncomes.isPresent()) {
+//            List<String> allSymbols = optionalVariableIncomes.get();
+//            List<List<String>> groupedSymbols = new ArrayList<>();
+//            final int GROUP_SIZE = 10;
+//
+//            for (int i = 0; i < allSymbols.size(); i += GROUP_SIZE) {
+//                int endIndex = Math.min(i + GROUP_SIZE, allSymbols.size());
+//                groupedSymbols.add(new ArrayList<>(allSymbols.subList(i, endIndex)));
+//            }
+//
+//            List<Optional<StockDetailResponse>> responsesForGroups = new ArrayList<>();
+//            for (List<String> group : groupedSymbols) {
+//                if (!group.isEmpty()) {
+//                    Optional<StockDetailResponse> detailsResponse = investmentDataServiceClient.getVariableDetailsBySymbols(group);
+//                    responsesForGroups.add(detailsResponse);
+//                }
+//            }
+//
+//            List<StockScoreResult> stockScoreList = new ArrayList<>();
+//
+//            responsesForGroups.stream()
+//                    .forEach(stockDetailResponse -> stockDetailResponse.get().results().stream()
+//                            .map(stockResult -> calculateScoreFromMetrics(stockDataMapper(stockResult), investmentProfile))
+//                            .filter(score -> score.score >= 5.0)
+//                            .forEach(stockScoreList::add));
+//
+//            stockScoreList.sort(Comparator.comparingDouble((StockScoreResult stockScore) -> stockScore.score).reversed());
+//
+//            return stockScoreList;
+//
+//        } else {
+//            return Collections.emptyList();
+//        }
+//    }
 
     public StockDTO stockDataMapper(StockResult stockResult){
         return new StockDTO(

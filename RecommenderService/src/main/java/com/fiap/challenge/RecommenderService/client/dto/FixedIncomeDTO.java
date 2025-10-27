@@ -1,5 +1,7 @@
 package com.fiap.challenge.RecommenderService.client.dto;
 
+import com.fiap.challenge.RecommenderService.model.InvestimentRecommendation;
+
 import java.time.LocalDate;
 
 public record FixedIncomeDTO(
@@ -14,4 +16,4 @@ public record FixedIncomeDTO(
         String issuer,
         Integer issuerRiskScore,
         String source
-) {}
+) implements InvestimentRecommendation {}
