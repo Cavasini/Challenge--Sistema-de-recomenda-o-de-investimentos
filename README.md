@@ -179,6 +179,29 @@ Abaixo está um exemplo completo da resposta da API:
 
 ---
 
+---
+
+## 📖 Documentação da API (Swagger)
+
+A documentação detalhada de cada endpoint pode ser encontrada nos respectivos links do Swagger:
+
+**Observação:** Com exceção do `AuthService` (para login e registro), todos os outros endpoints (`ProfileAnalyzerService`, `InvestmentDataService` e `RecommenderService`) requerem um token de autenticação (JWT) obtido no login para serem acessados.
+
+- **AuthService (Autenticação):**
+  [http://ec2-52-207-230-152.compute-1.amazonaws.com:8082/swagger-ui/index.html#/](http://ec2-52-207-230-152.compute-1.amazonaws.com:8082/swagger-ui/index.html#/)
+
+- **ProfileAnalyzerService (Análise de Perfil):**
+  [http://ec2-52-207-230-152.compute-1.amazonaws.com:8080/swagger-ui/index.html#/](http://ec2-52-207-230-152.compute-1.amazonaws.com:8080/swagger-ui/index.html#/)
+
+- **InvestmentDataService (Dados de Investimentos):**
+  [http://ec2-3-88-201-1.compute-1.amazonaws.com:8083/swagger-ui/index.html#/](http://ec2-3-88-201-1.compute-1.amazonaws.com:8083/swagger-ui/index.html#/)
+
+- **RecommenderService (Recomendação):**
+  [http://ec2-3-88-201-1.compute-1.amazonaws.com:8081/swagger-ui/index.html#/](http://ec2-3-88-201-1.compute-1.amazonaws.com:8081/swagger-ui/index.html#/)
+
+
+---
+
 ## 🚀 Executando o Projeto Localmente
 
 Para executar o projeto em seu ambiente local, siga os passos abaixo:
