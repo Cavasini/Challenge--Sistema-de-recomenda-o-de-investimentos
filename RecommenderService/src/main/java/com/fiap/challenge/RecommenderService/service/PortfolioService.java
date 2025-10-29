@@ -18,8 +18,15 @@ public class PortfolioService {
     }
 
     public UserRecomendation savePortfolio(UserRecomendation portfolio) {
-        System.out.println("Salvando recomendação para o usuário: " + portfolio.getUserProfile().getUserId());
-        return repository.save(portfolio);
+        try {
+            if (hasUserPortfolio(portfolio.getId())) {
+                repository.deleteById(portfolio.getId());
+            }
+            System.out.println("Salvando recomendação para o usuário: " + portfolio.getUserProfile().getUserId());
+            return repository.save(portfolio);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void deletePortfolio(String userId){
@@ -33,5 +40,9 @@ public class PortfolioService {
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Portfólio não encontrado para o usuário com ID: " + userId
                 ));
+    }
+
+    private boolean hasUserPortfolio(String userId){
+        return repository.existsById(userId);
     }
 }

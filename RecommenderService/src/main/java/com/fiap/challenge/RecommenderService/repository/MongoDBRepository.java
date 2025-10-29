@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface MongoDBRepository extends MongoRepository<UserRecomendation, String> {
 
     Optional<UserRecomendation> findByUserProfileUserId(String userId);
+
+    boolean existsById(String id);
 }
