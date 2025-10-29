@@ -52,12 +52,13 @@ public class FixedIncomeAdjustmentService {
         Optional<InflationDataDTO> inflationDataOptional = brapApiClient.getInflation();
         String inflationValue = inflationDataOptional
                 .map(InflationDataDTO::value)
-                .orElse(null);
+                .orElse("3.5");
+
 
         Optional<PrimeRateDataDTO> primeRateDataOptional = brapApiClient.getPrimeRate();
         String selicValue = primeRateDataOptional
                 .map(PrimeRateDataDTO::value)
-                .orElse(null);
+                .orElse("10.5");
 
         return new FixedIncomeResponse(fixedIncomeDTOS, inflationValue, selicValue);
     }
