@@ -241,9 +241,6 @@ Este sistema foi **deployado na AWS** utilizando **boas práticas de CI/CD**, ga
 
 ![Logo do Projeto](./image1.png)
 
-## Desenho das melhorias futuras para o sistema
-
-![Logo do Projeto](./image2.png)
 ---
 
 
